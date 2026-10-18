@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>داشبورد کنترل پروژه اپلیکیشن و وب‌سایت</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Custom Styles & Vazirmatn Font -->
+  <style>
+/* Custom CSS & RTL enhancements for Project Tracker Dashboard */
+
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+
+:root {
+  --font-sans: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  direction: rtl;
+  text-align: right;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8);
+}
+
+/* Glassmorphism */
+.glass-panel {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Custom Checkbox */
+.task-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid #64748b;
+  outline: none;
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: transparent;
+  flex-shrink: 0;
+}
+
+.task-checkbox:hover {
+  border-color: #38bdf8;
+  transform: scale(1.05);
+}
+
+.task-checkbox:checked {
+  background-color: #10b981;
+  border-color: #10b981;
+}
+
+.task-checkbox:checked::before {
+  content: "";
+  width: 10px;
+  height: 6px;
+  border-left: 2.5px solid white;
+  border-bottom: 2.5px solid white;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+/* Animations */
+@keyframes checkPulse {
+  0% { transform: scale(0.9); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.checked-animate {
+  animation: checkPulse 0.3s ease-out;
+}
+
+/* Smooth Accordion */
+.accordion-content {
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+/* Progress ring styles */
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .glass-panel {
+    background: white !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+  }
+}
+
+</style>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Vazirmatn', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- هدر اصلی داشبورد -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-30 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- لوگو و عنوان -->
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 text-xl font-bold">
+          <i class="fa-solid fa-bars-progress"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-lg sm:text-xl text-white tracking-tight flex items-center flex-wrap gap-2">
+            داشبورد کنترل پروژه اپلیکیشن و وب‌سایت
+            <span id="saveStatusBadge" class="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 font-medium">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> ذخیره خودکار فعال
+            </span>
+          </h1>
+          <p class="text-xs text-slate-400 mt-0.5">پیگیری گام‌به‌گام و ثبت پیشرفت ۳۱۸ تسک در ۲۰ سرفصل پروژه</p>
+        </div>
+      </div>
+
+      <!-- دکمه‌های عملیاتی هدر -->
+      <div class="flex items-center flex-wrap gap-2">
+        <!-- دکمه اصلی: کپی لینک برای همکاران -->
+        <button onclick="copyProjectShareLink()" class="px-4 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white transition flex items-center gap-2 shadow-lg shadow-blue-600/30 border border-blue-400/40" title="کپی لینک پیشرفت پروژه برای اشتراک با همکاران">
+          <i class="fa-solid fa-link text-blue-200"></i>
+          <span>📋 کپی لینک پیشرفت</span>
+        </button>
+
+        <!-- خروجی اکسل -->
+        <button onclick="exportToCsv()" class="px-3 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="خروجی کامل اکسل CSV">
+          <i class="fa-solid fa-file-excel text-emerald-400"></i>
+          <span class="hidden sm:inline">خروجی اکسل</span>
+        </button>
+
+        <!-- خروجی پشتیبان JSON -->
+        <button onclick="exportProjectData()" class="px-3 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="دانلود فایل پشتیبان">
+          <i class="fa-solid fa-download text-slate-400"></i>
+          <span class="hidden md:inline">ذخیره فایل</span>
+        </button>
+
+        <!-- بارگذاری پشتیبان JSON -->
+        <label class="px-3 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-sm" title="بارگذاری فایل پشتیبان قبلی">
+          <i class="fa-solid fa-upload text-slate-400"></i>
+          <span class="hidden md:inline">بارگذاری فایل</span>
+          <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importProjectData(event)">
+        </label>
+
+        <!-- چاپ / خروجی PDF -->
+        <button onclick="window.print()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 flex items-center justify-center transition" title="چاپ یا ذخیره PDF">
+          <i class="fa-solid fa-print"></i>
+        </button>
+
+        <!-- ریست تمام تیک‌ها -->
+        <button onclick="confirmResetAll()" class="w-8 h-8 rounded-xl bg-rose-950/40 hover:bg-rose-900/50 text-rose-400 border border-rose-800/40 flex items-center justify-center transition" title="بازنشانی تمام تیک‌ها">
+          <i class="fa-solid fa-arrow-rotate-left"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- کارت‌های آمار کلیدی پروژه (KPIs) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      
+      <!-- درصد کل پیشرفت -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-blue-500/30 bg-gradient-to-br from-blue-950/40 to-slate-900 relative overflow-hidden shadow-lg">
+        <div class="flex items-center justify-between text-xs text-blue-300 font-semibold mb-2">
+          <span>درصد پیشرفت کل</span>
+          <i class="fa-solid fa-chart-pie text-blue-400"></i>
+        </div>
+        <div class="text-3xl font-extrabold text-white mb-2" id="statOverallPercent">۰٪</div>
+        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+          <div id="statProgressBar" class="bg-gradient-to-r from-blue-500 to-emerald-400 h-full transition-all duration-500" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- کل تسک‌ها -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800 shadow-lg">
+        <div class="flex items-center justify-between text-xs text-slate-400 font-medium mb-1">
+          <span>کل تسک‌های پروژه</span>
+          <i class="fa-solid fa-list-check text-slate-500"></i>
+        </div>
+        <div class="text-2xl font-bold text-slate-100" id="statTotalTasks">۳۱۸</div>
+        <div class="text-[11px] text-slate-400 mt-2">در ۲۰ سرفصل تخصصی</div>
+      </div>
+
+      <!-- تسک‌های انجام‌شده -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-emerald-500/20 bg-emerald-950/10 shadow-lg">
+        <div class="flex items-center justify-between text-xs text-emerald-400 font-medium mb-1">
+          <span>انجام‌شده</span>
+          <i class="fa-solid fa-check-circle text-emerald-400"></i>
+        </div>
+        <div class="text-2xl font-bold text-emerald-400" id="statCompletedTasks">۰</div>
+        <div class="text-[11px] text-emerald-500/80 mt-2">مراحل تکمیل‌شده</div>
+      </div>
+
+      <!-- تسک‌های باقی‌مانده -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-amber-500/20 bg-amber-950/10 shadow-lg">
+        <div class="flex items-center justify-between text-xs text-amber-400 font-medium mb-1">
+          <span>باقی‌مانده</span>
+          <i class="fa-solid fa-clock text-amber-400"></i>
+        </div>
+        <div class="text-2xl font-bold text-amber-400" id="statPendingTasks">۳۱۸</div>
+        <div class="text-[11px] text-amber-500/80 mt-2">در انتظار انجام</div>
+      </div>
+
+      <!-- فازهای تکمیل‌شده -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-purple-500/20 bg-purple-950/10 shadow-lg">
+        <div class="flex items-center justify-between text-xs text-purple-300 font-medium mb-1">
+          <span>سرفصل‌های ۱۰۰٪ شده</span>
+          <i class="fa-solid fa-circle-check text-purple-400"></i>
+        </div>
+        <div class="text-2xl font-bold text-purple-300" id="statCompletedPhases">۰ از ۲۰</div>
+        <div class="text-[11px] text-purple-400/80 mt-2">فازهای کامل‌شده</div>
+      </div>
+
+    </div>
+
+    <!-- بخش نمودارهای پیشرفت -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 no-print">
+      
+      <!-- نمودار ۱: دونات وضعیت اتمام پروژه -->
+      <div class="lg:col-span-4 glass-panel rounded-2xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-gauge-high text-emerald-400"></i>
+            نسبت کل تسک‌ها
+          </h3>
+          <span class="text-xs text-slate-400">انجام‌شده / باقی‌مانده</span>
+        </div>
+        <div class="relative h-64 flex items-center justify-center">
+          <canvas id="chartOverallCanvas"></canvas>
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <div id="chartOverallCenterText" class="text-3xl font-extrabold text-white">۰٪</div>
+            <div class="text-[11px] text-slate-400 font-medium">پیشرفت کل</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- نمودار ۲: درصد پیشرفت تک‌تک فازهای پروژه -->
+      <div class="lg:col-span-8 glass-panel rounded-2xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-chart-column text-blue-400"></i>
+            درصد پیشرفت ۲۰ سرفصل پروژه
+          </h3>
+          <span class="text-xs text-slate-400">از ۰ تا ۱۰۰ درصد</span>
+        </div>
+        <div class="h-64 relative">
+          <canvas id="chartPhasesCanvas"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- نوار جستجو، فیلترها و عملیات سریع -->
+    <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800 shadow-xl no-print space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        
+        <!-- جستجو در متن تسک‌ها -->
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3 text-slate-400 text-xs"></i>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="جستجو در تسک‌ها... (کلید / یا Ctrl+K)"
+            class="w-full pr-9 pl-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+          >
+        </div>
+
+        <!-- فیلتر وضعیت -->
+        <div>
+          <select 
+            id="filterStatus"
+            class="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-700 text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer"
+          >
+            <option value="all">تمام وضعیت‌ها (همه تسک‌ها)</option>
+            <option value="pending">فقط باقی‌مانده‌ها (تیک نخورده)</option>
+            <option value="completed">فقط تکمیل‌شده‌ها (تیک خورده)</option>
+          </select>
+        </div>
+
+        <!-- فیلتر فازها -->
+        <div>
+          <select 
+            id="filterCategory"
+            class="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-700 text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer"
+          >
+            <!-- پر می‌شود توسط JS -->
+          </select>
+        </div>
+
+      </div>
+
+      <!-- دکمه‌های کنترل باز/بسته کردن همه فازها -->
+      <div class="flex items-center justify-between border-t border-slate-800 pt-3 flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <button onclick="expandAllCategories()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-angles-down text-[10px]"></i>
+            <span>باز کردن تمام فازها</span>
+          </button>
+          <button onclick="collapseAllCategories()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-angles-up text-[10px]"></i>
+            <span>بستن تمام فازها</span>
+          </button>
+          <button onclick="resetFilters()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/60 text-slate-400 hover:text-white transition flex items-center gap-1.5">
+            <i class="fa-solid fa-filter-circle-xmark text-[10px]"></i>
+            <span>پاک کردن فیلترها</span>
+          </button>
+        </div>
+
+        <div class="text-xs text-slate-400 flex items-center gap-2">
+          <i class="fa-solid fa-circle-info text-blue-400"></i>
+          <span>برای ثبت پیشرفت، روی چک‌باکس هر تسک کلیک کنید. تغییرات بلافاصله ذخیره می‌شوند.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- محفظه اصلی چک‌لیست‌های ۲۰ گانه -->
+    <div id="checklistContainer" class="space-y-4">
+      <!-- پر می‌شود توسط JavaScript -->
+    </div>
+
+  </main>
+
+  <!-- پیام اعلان فلوتینگ (Toast) -->
+  <div id="toastNotification" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-slate-900/95 border border-blue-500/50 text-white text-xs font-medium shadow-2xl backdrop-blur transition-all duration-300 opacity-0 translate-y-4 pointer-events-none flex items-center gap-2">
+    اعلان سیستم
+  </div>
+
+  <!-- اسکریپت‌های پروژه -->
+  <script>
+/**
+ * داده‌های اولیه پروژه و تسک‌های جامع
+ * داشبورد کنترل پروژه اپلیکیشن و وب‌سایت
+ */
+
+
+var INITIAL_CATEGORIES = [
+  {
+    id: 'pre_start',
+    title: 'نکات مهم پیش از شروع',
+    icon: 'fa-flag-checkered',
+    color: 'from-amber-500 to-yellow-600',
+    tasks: [
+      { id: 'ps_1', title: 'مشخص‌کردن کشور هدف و فروشگاه‌های محل انتشار' },
+      { id: 'ps_2', title: 'مشخص‌کردن اینکه پرداخت‌ها برای محصولات دیجیتال هستند یا خدمات و کالاهای فیزیکی' },
+      { id: 'ps_3', title: 'تعیین اینکه اپلیکیشن فقط اندروید است یا iOS هم دارد' },
+      { id: 'ps_4', title: 'تعیین اینکه حساب کاربری میان سایت و اپلیکیشن مشترک خواهد بود یا خیر' },
+      { id: 'ps_5', title: 'تعیین روش‌های پرداخت قابل استفاده' }
+    ]
+  },
+  {
+    id: 'planning',
+    title: '۱. برنامه‌ریزی و طراحی پروژه',
+    icon: 'fa-compass-drafting',
+    color: 'from-blue-500 to-indigo-600',
+    tasks: [
+      { id: 'c1_1', title: 'تعیین هدف و کاربرد اپلیکیشن' },
+      { id: 'c1_2', title: 'تعیین امکانات و قابلیت‌های موردنیاز' },
+      { id: 'c1_3', title: 'تعیین مخاطبان هدف' },
+      { id: 'c1_4', title: 'تدوین مستندات فنی پروژه' },
+      { id: 'c1_5', title: 'طراحی معماری نرم‌افزار' },
+      { id: 'c1_6', title: 'طراحی ساختار صفحات و بخش‌ها' },
+      { id: 'c1_7', title: 'طراحی رابط کاربری (UI)' },
+      { id: 'c1_8', title: 'طراحی تجربه کاربری (UX)' },
+      { id: 'c1_9', title: 'طراحی لوگو و هویت بصری' },
+      { id: 'c1_10', title: 'طراحی نسخه اولیه (MVP)' },
+      { id: 'c1_11', title: 'تعیین فناوری‌های مورد استفاده' },
+      { id: 'c1_12', title: 'برآورد هزینه‌های توسعه و نگهداری' }
+    ]
+  },
+  {
+    id: 'infrastructure',
+    title: '۲. دامنه و زیرساخت',
+    icon: 'fa-server',
+    color: 'from-sky-500 to-cyan-600',
+    tasks: [
+      { id: 'c2_1', title: 'ثبت دامنه اینترنتی' },
+      { id: 'c2_2', title: 'خرید سرور مجازی (VPS) یا سرور اختصاصی' },
+      { id: 'c2_3', title: 'تهیه هاست، در صورت نیاز' },
+      { id: 'c2_4', title: 'تنظیم DNS دامنه' },
+      { id: 'c2_5', title: 'تهیه گواهی SSL و راه‌اندازی HTTPS' },
+      { id: 'c2_6', title: 'راه‌اندازی ایمیل سازمانی' },
+      { id: 'c2_7', title: 'نصب و پیکربندی سیستم‌عامل سرور' },
+      { id: 'c2_8', title: 'نصب و پیکربندی وب‌سرور' },
+      { id: 'c2_9', title: 'تنظیم فایروال سرور' },
+      { id: 'c2_10', title: 'راه‌اندازی شبکه توزیع محتوا (CDN)، در صورت نیاز' },
+      { id: 'c2_11', title: 'تهیه فضای ذخیره‌سازی فایل‌ها' },
+      { id: 'c2_12', title: 'راه‌اندازی سیستم پشتیبان‌گیری' },
+      { id: 'c2_13', title: 'تنظیم مانیتورینگ سرور' },
+      { id: 'c2_14', title: 'برنامه‌ریزی برای افزایش ظرفیت سرور در آینده' }
+    ]
+  },
+  {
+    id: 'web_dev',
+    title: '۳. توسعه وب‌سایت',
+    icon: 'fa-globe',
+    color: 'from-emerald-500 to-teal-600',
+    tasks: [
+      { id: 'c3_1', title: 'طراحی صفحه اصلی' },
+      { id: 'c3_2', title: 'طراحی صفحات معرفی و اطلاعات' },
+      { id: 'c3_3', title: 'طراحی صفحات امکانات و خدمات' },
+      { id: 'c3_4', title: 'طراحی صفحه ثبت‌نام' },
+      { id: 'c3_5', title: 'طراحی صفحه ورود' },
+      { id: 'c3_6', title: 'طراحی صفحه بازیابی رمز عبور' },
+      { id: 'c3_7', title: 'طراحی پنل کاربری' },
+      { id: 'c3_8', title: 'طراحی صفحه پروفایل کاربر' },
+      { id: 'c3_9', title: 'طراحی صفحه تنظیمات حساب' },
+      { id: 'c3_10', title: 'طراحی صفحه اشتراک‌ها و خریدها' },
+      { id: 'c3_11', title: 'طراحی صفحه سوابق پرداخت' },
+      { id: 'c3_12', title: 'طراحی صفحه پشتیبانی' },
+      { id: 'c3_13', title: 'طراحی صفحه تماس با ما' },
+      { id: 'c3_14', title: 'طراحی صفحات قوانین و مقررات' },
+      { id: 'c3_15', title: 'طراحی صفحه حریم خصوصی' },
+      { id: 'c3_16', title: 'طراحی صفحه خطا و خطای ۴۰۴' },
+      { id: 'c3_17', title: 'پیاده‌سازی نسخه واکنش‌گرا برای موبایل، تبلت و کامپیوتر' },
+      { id: 'c3_18', title: 'بهینه‌سازی سرعت بارگذاری' },
+      { id: 'c3_19', title: 'بهینه‌سازی سئو' },
+      { id: 'c3_20', title: 'اتصال وب‌سایت به بک‌اند و پایگاه داده' },
+      { id: 'c3_21', title: 'پیاده‌سازی فرم‌ها و اعتبارسنجی اطلاعات' },
+      { id: 'c3_22', title: 'راه‌اندازی نقشه سایت و فایل‌های موردنیاز موتورهای جست‌وجو' }
+    ]
+  },
+  {
+    id: 'mobile_dev',
+    title: '۴. توسعه اپلیکیشن موبایل',
+    icon: 'fa-mobile-screen-button',
+    color: 'from-purple-500 to-violet-600',
+    tasks: [
+      { id: 'c4_1', title: 'طراحی رابط کاربری اپلیکیشن' },
+      { id: 'c4_2', title: 'طراحی صفحه شروع و راه‌اندازی اولیه' },
+      { id: 'c4_3', title: 'طراحی صفحه ثبت‌نام و ورود' },
+      { id: 'c4_4', title: 'پیاده‌سازی احراز هویت کاربران' },
+      { id: 'c4_5', title: 'پیاده‌سازی پروفایل کاربری' },
+      { id: 'c4_6', title: 'پیاده‌سازی امکانات اصلی اپلیکیشن' },
+      { id: 'c4_7', title: 'پیاده‌سازی تنظیمات حساب کاربری' },
+      { id: 'c4_8', title: 'پیاده‌سازی سیستم اعلان‌ها' },
+      { id: 'c4_9', title: 'پیاده‌سازی مدیریت خطاها' },
+      { id: 'c4_10', title: 'پیاده‌سازی مدیریت وضعیت اینترنت' },
+      { id: 'c4_11', title: 'پیاده‌سازی ذخیره‌سازی محلی اطلاعات موردنیاز' },
+      { id: 'c4_12', title: 'اتصال اپلیکیشن به بک‌اند از طریق API' },
+      { id: 'c4_13', title: 'هماهنگ‌سازی اطلاعات میان اپلیکیشن و وب‌سایت' },
+      { id: 'c4_14', title: 'بهینه‌سازی مصرف اینترنت و باتری' },
+      { id: 'c4_15', title: 'بررسی سازگاری با اندازه‌های مختلف صفحه' },
+      { id: 'c4_16', title: 'بررسی سازگاری با نسخه‌های مختلف سیستم‌عامل' },
+      { id: 'c4_17', title: 'تهیه آیکون اپلیکیشن' },
+      { id: 'c4_18', title: 'طراحی صفحه شروع (Splash Screen)' },
+      { id: 'c4_19', title: 'آماده‌سازی نسخه آزمایشی' },
+      { id: 'c4_20', title: 'آماده‌سازی نسخه انتشار' }
+    ]
+  },
+  {
+    id: 'backend',
+    title: '۵. بک‌اند و منطق اصلی سیستم',
+    icon: 'fa-gears',
+    color: 'from-indigo-500 to-blue-700',
+    tasks: [
+      { id: 'c5_1', title: 'انتخاب فناوری بک‌اند' },
+      { id: 'c5_2', title: 'پیاده‌سازی منطق اصلی برنامه' },
+      { id: 'c5_3', title: 'طراحی و پیاده‌سازی APIها' },
+      { id: 'c5_4', title: 'مدیریت درخواست‌های کاربران' },
+      { id: 'c5_5', title: 'پیاده‌سازی ثبت‌نام و ورود' },
+      { id: 'c5_6', title: 'پیاده‌سازی احراز هویت' },
+      { id: 'c5_7', title: 'پیاده‌سازی مدیریت نشست‌ها و توکن‌ها' },
+      { id: 'c5_8', title: 'پیاده‌سازی سطح دسترسی کاربران' },
+      { id: 'c5_9', title: 'پیاده‌سازی مدیریت اطلاعات کاربران' },
+      { id: 'c5_10', title: 'پیاده‌سازی مدیریت محتوا و داده‌ها' },
+      { id: 'c5_11', title: 'پیاده‌سازی سیستم مدیریت اشتراک‌ها، در صورت نیاز' },
+      { id: 'c5_12', title: 'پیاده‌سازی مدیریت خریدها' },
+      { id: 'c5_13', title: 'پیاده‌سازی مدیریت پرداخت‌ها' },
+      { id: 'c5_14', title: 'پیاده‌سازی مدیریت خطاها و استثناها' },
+      { id: 'c5_15', title: 'پیاده‌سازی ثبت رویدادهای مهم' },
+      { id: 'c5_16', title: 'پیاده‌سازی محدودسازی درخواست‌ها (Rate Limiting)' },
+      { id: 'c5_17', title: 'پیاده‌سازی اعتبارسنجی ورودی‌ها' },
+      { id: 'c5_18', title: 'مستندسازی APIها' },
+      { id: 'c5_19', title: 'پیاده‌سازی کنترل نسخه APIها' }
+    ]
+  },
+  {
+    id: 'database',
+    title: '۶. پایگاه داده و ذخیره‌سازی',
+    icon: 'fa-database',
+    color: 'from-amber-600 to-orange-700',
+    tasks: [
+      { id: 'c6_1', title: 'انتخاب نوع پایگاه داده' },
+      { id: 'c6_2', title: 'طراحی ساختار پایگاه داده' },
+      { id: 'c6_3', title: 'طراحی جداول کاربران' },
+      { id: 'c6_4', title: 'طراحی جداول اطلاعات اصلی برنامه' },
+      { id: 'c6_5', title: 'طراحی جداول خریدها و سفارش‌ها' },
+      { id: 'c6_6', title: 'طراحی جداول تراکنش‌های مالی' },
+      { id: 'c6_7', title: 'طراحی جداول اشتراک‌ها، در صورت نیاز' },
+      { id: 'c6_8', title: 'طراحی جداول مجوزهای دسترسی و امکانات خریداری‌شده' },
+      { id: 'c6_9', title: 'طراحی جداول اعلان‌ها' },
+      { id: 'c6_10', title: 'طراحی جداول گزارش‌ها' },
+      { id: 'c6_11', title: 'ایجاد روابط و محدودیت‌های پایگاه داده' },
+      { id: 'c6_12', title: 'بهینه‌سازی کوئری‌ها و ایندکس‌ها' },
+      { id: 'c6_13', title: 'تنظیم سطوح دسترسی پایگاه داده' },
+      { id: 'c6_14', title: 'تنظیم پشتیبان‌گیری خودکار' },
+      { id: 'c6_15', title: 'آزمایش بازیابی اطلاعات' },
+      { id: 'c6_16', title: 'تعیین سیاست نگهداری و حذف اطلاعات' }
+    ]
+  },
+  {
+    id: 'payments',
+    title: '۷. پرداخت درون‌برنامه‌ای و سیستم مالی',
+    icon: 'fa-credit-card',
+    color: 'from-green-600 to-emerald-700',
+    note: 'نکته مهم: روش مجاز پرداخت به نوع محصول، کشور انتشار و قوانین فروشگاه بستگی دارد. برای محصولات دیجیتال، ممکن است استفاده از سیستم پرداخت خود فروشگاه الزامی باشد یا استثناهای مشخصی وجود داشته باشد. این موضوع را پیش از توسعه نهایی بررسی کنید.',
+    tasks: [
+      { id: 'c7_1', title: 'تعیین مدل درآمدزایی اپلیکیشن' },
+      { id: 'c7_2', title: 'تعیین محصولات و خدمات قابل خرید' },
+      { id: 'c7_3', title: 'تعیین قیمت محصولات و خدمات' },
+      { id: 'c7_4', title: 'تعیین نوع پرداخت؛ خرید یکباره یا اشتراک دوره‌ای' },
+      { id: 'c7_5', title: 'بررسی قوانین پرداخت فروشگاه‌های اپلیکیشن هدف' },
+      { id: 'c7_6', title: 'انتخاب درگاه پرداخت مناسب وب‌سایت' },
+      { id: 'c7_7', title: 'پیاده‌سازی پرداخت درون‌برنامه‌ای اندروید' },
+      { id: 'c7_8', title: 'پیاده‌سازی پرداخت درون‌برنامه‌ای iOS، در صورت انتشار برای این سیستم‌عامل' },
+      { id: 'c7_9', title: 'بررسی نیاز به استفاده از سیستم پرداخت اختصاصی هر فروشگاه' },
+      { id: 'c7_10', title: 'پیاده‌سازی خرید محصولات دیجیتال' },
+      { id: 'c7_11', title: 'پیاده‌سازی خرید اشتراک، در صورت نیاز' },
+      { id: 'c7_12', title: 'پیاده‌سازی ارتقا و تمدید اشتراک' },
+      { id: 'c7_13', title: 'پیاده‌سازی لغو اشتراک' },
+      { id: 'c7_14', title: 'پیاده‌سازی مدیریت انقضای اشتراک' },
+      { id: 'c7_15', title: 'پیاده‌سازی تأیید خرید در سمت سرور' },
+      { id: 'c7_16', title: 'اعتبارسنجی رسید خرید' },
+      { id: 'c7_17', title: 'اعتبارسنجی اعلان‌های سرور فروشگاه‌ها' },
+      { id: 'c7_18', title: 'پیاده‌سازی ثبت تراکنش‌ها' },
+      { id: 'c7_19', title: 'جلوگیری از ثبت تراکنش تکراری' },
+      { id: 'c7_20', title: 'پیاده‌سازی مدیریت پرداخت ناموفق' },
+      { id: 'c7_21', title: 'پیاده‌سازی مدیریت خریدهای معلق' },
+      { id: 'c7_22', title: 'پیاده‌سازی بازیابی خریدهای قبلی' },
+      { id: 'c7_23', title: 'پیاده‌سازی بازپرداخت وجه، در صورت پشتیبانی' },
+      { id: 'c7_24', title: 'پیاده‌سازی مدیریت اختلاف وضعیت پرداخت و سفارش' },
+      { id: 'c7_25', title: 'ثبت سوابق پرداخت و خرید کاربران' },
+      { id: 'c7_26', title: 'پیاده‌سازی سیستم فعال‌سازی امکانات پس از خرید موفق' },
+      { id: 'c7_27', title: 'پیاده‌سازی سیستم کیف پول، در صورت نیاز' },
+      { id: 'c7_28', title: 'پیاده‌سازی کد تخفیف، در صورت نیاز' },
+      { id: 'c7_29', title: 'پیاده‌سازی فاکتور و گزارش مالی' },
+      { id: 'c7_30', title: 'بررسی تطبیق تراکنش‌های ثبت‌شده با گزارش فروشگاه یا درگاه' },
+      { id: 'c7_31', title: 'آزمایش کامل پرداخت در محیط آزمایشی' },
+      { id: 'c7_32', title: 'آزمایش سناریوهای بازپرداخت و لغو خرید' }
+    ]
+  },
+  {
+    id: 'admin_panel',
+    title: '۸. پنل مدیریت',
+    icon: 'fa-chart-pie',
+    color: 'from-rose-500 to-red-600',
+    tasks: [
+      { id: 'c8_1', title: 'طراحی پنل مدیریت' },
+      { id: 'c8_2', title: 'ورود امن مدیران' },
+      { id: 'c8_3', title: 'تعریف نقش‌ها و سطح دسترسی مدیران' },
+      { id: 'c8_4', title: 'مدیریت کاربران' },
+      { id: 'c8_5', title: 'مشاهده و مدیریت حساب‌های کاربری' },
+      { id: 'c8_6', title: 'مدیریت محتوا' },
+      { id: 'c8_7', title: 'مدیریت محصولات و خدمات' },
+      { id: 'c8_8', title: 'مدیریت قیمت‌ها' },
+      { id: 'c8_9', title: 'مدیریت سفارش‌ها' },
+      { id: 'c8_10', title: 'مشاهده تراکنش‌های مالی' },
+      { id: 'c8_11', title: 'مشاهده وضعیت پرداخت‌ها' },
+      { id: 'c8_12', title: 'مدیریت اشتراک‌ها' },
+      { id: 'c8_13', title: 'مدیریت درخواست‌های پشتیبانی' },
+      { id: 'c8_14', title: 'مدیریت اعلان‌ها' },
+      { id: 'c8_15', title: 'مشاهده آمار کاربران' },
+      { id: 'c8_16', title: 'مشاهده آمار فروش' },
+      { id: 'c8_17', title: 'مشاهده گزارش‌های مالی' },
+      { id: 'c8_18', title: 'مشاهده گزارش خطاهای سیستم' },
+      { id: 'c8_19', title: 'مشاهده گزارش فعالیت مدیران' },
+      { id: 'c8_20', title: 'امکان مسدودسازی حساب‌های متخلف' },
+      { id: 'c8_21', title: 'امکان مدیریت تنظیمات عمومی سیستم' },
+      { id: 'c8_22', title: 'امکان خروجی گرفتن از گزارش‌ها' }
+    ]
+  },
+  {
+    id: 'security',
+    title: '۹. امنیت اطلاعات',
+    icon: 'fa-shield-halved',
+    color: 'from-slate-700 to-zinc-900',
+    tasks: [
+      { id: 'c9_1', title: 'استفاده از HTTPS' },
+      { id: 'c9_2', title: 'ذخیره امن رمزهای عبور با الگوریتم هش مناسب' },
+      { id: 'c9_3', title: 'پیاده‌سازی احراز هویت امن' },
+      { id: 'c9_4', title: 'استفاده از احراز هویت دومرحله‌ای برای مدیران' },
+      { id: 'c9_5', title: 'پیاده‌سازی کنترل دسترسی سمت سرور' },
+      { id: 'c9_6', title: 'محافظت در برابر SQL Injection' },
+      { id: 'c9_7', title: 'محافظت در برابر XSS' },
+      { id: 'c9_8', title: 'محافظت در برابر CSRF، در صورت مرتبط بودن با معماری' },
+      { id: 'c9_9', title: 'اعتبارسنجی ورودی‌ها در سمت سرور' },
+      { id: 'c9_10', title: 'محافظت از APIها' },
+      { id: 'c9_11', title: 'نگهداری امن کلیدهای محرمانه و اطلاعات دسترسی' },
+      { id: 'c9_12', title: 'جلوگیری از ذخیره اطلاعات حساس پرداخت در اپلیکیشن' },
+      { id: 'c9_13', title: 'پیاده‌سازی محدودیت تلاش برای ورود' },
+      { id: 'c9_14', title: 'پیاده‌سازی محدودسازی درخواست‌های مشکوک' },
+      { id: 'c9_15', title: 'تنظیم فایروال' },
+      { id: 'c9_16', title: 'به‌روزرسانی منظم نرم‌افزارهای سرور' },
+      { id: 'c9_17', title: 'بررسی آسیب‌پذیری‌های وابستگی‌ها' },
+      { id: 'c9_18', title: 'ثبت و پایش رویدادهای امنیتی' },
+      { id: 'c9_19', title: 'محافظت از نسخه‌های پشتیبان' },
+      { id: 'c9_20', title: 'تهیه برنامه واکنش به رخدادهای امنیتی' },
+      { id: 'c9_21', title: 'آزمایش امنیتی پیش از انتشار' }
+    ]
+  },
+  {
+    id: 'notifications',
+    title: '۱۰. اعلان‌ها و ارتباط با کاربران',
+    icon: 'fa-bell',
+    color: 'from-yellow-500 to-amber-600',
+    tasks: [
+      { id: 'c10_1', title: 'راه‌اندازی اعلان‌های پوش (Push Notifications)' },
+      { id: 'c10_2', title: 'راه‌اندازی اعلان‌های داخل اپلیکیشن' },
+      { id: 'c10_3', title: 'راه‌اندازی ارسال ایمیل' },
+      { id: 'c10_4', title: 'راه‌اندازی پیامک، در صورت نیاز' },
+      { id: 'c10_5', title: 'پیاده‌سازی تأیید شماره تلفن، در صورت نیاز' },
+      { id: 'c10_6', title: 'پیاده‌سازی تأیید ایمیل' },
+      { id: 'c10_7', title: 'پیاده‌سازی اعلان خرید موفق' },
+      { id: 'c10_8', title: 'پیاده‌سازی اعلان تمدید یا انقضای اشتراک' },
+      { id: 'c10_9', title: 'پیاده‌سازی اعلان‌های مهم حساب کاربری' },
+      { id: 'c10_10', title: 'طراحی قالب پیام‌ها' },
+      { id: 'c10_11', title: 'مدیریت خطاهای ارسال اعلان' }
+    ]
+  },
+  {
+    id: 'legal',
+    title: '۱۱. قوانین و الزامات حقوقی',
+    icon: 'fa-scale-balanced',
+    color: 'from-stone-600 to-neutral-800',
+    tasks: [
+      { id: 'c11_1', title: 'تدوین شرایط استفاده از خدمات' },
+      { id: 'c11_2', title: 'تدوین سیاست حفظ حریم خصوصی' },
+      { id: 'c11_3', title: 'تدوین سیاست بازپرداخت وجه' },
+      { id: 'c11_4', title: 'تدوین شرایط خرید و اشتراک' },
+      { id: 'c11_5', title: 'تعیین سیاست لغو اشتراک' },
+      { id: 'c11_6', title: 'تعیین سیاست نگهداری و حذف اطلاعات' },
+      { id: 'c11_7', title: 'بررسی الزامات قانونی کشور هدف' },
+      { id: 'c11_8', title: 'بررسی الزامات مالیاتی کسب‌وکار' },
+      { id: 'c11_9', title: 'بررسی قوانین حفاظت از اطلاعات کاربران' },
+      { id: 'c11_10', title: 'بررسی قوانین فروشگاه‌های اپلیکیشن' },
+      { id: 'c11_11', title: 'بررسی مجوزهای لازم برای فعالیت' },
+      { id: 'c11_12', title: 'درج اطلاعات تماس و هویت کسب‌وکار، در صورت لزوم' },
+      { id: 'c11_13', title: 'تهیه سازوکار دریافت درخواست حذف حساب کاربری' }
+    ]
+  },
+  {
+    id: 'quality_assurance',
+    title: '۱۲. تست و کنترل کیفیت',
+    icon: 'fa-vial-circle-check',
+    color: 'from-teal-500 to-cyan-700',
+    tasks: [
+      { id: 'c12_1', title: 'تست عملکرد صفحات وب' },
+      { id: 'c12_2', title: 'تست عملکرد اپلیکیشن' },
+      { id: 'c12_3', title: 'تست APIها' },
+      { id: 'c12_4', title: 'تست پایگاه داده' },
+      { id: 'c12_5', title: 'تست ثبت‌نام و ورود' },
+      { id: 'c12_6', title: 'تست بازیابی رمز عبور' },
+      { id: 'c12_7', title: 'تست سطوح دسترسی' },
+      { id: 'c12_8', title: 'تست خرید موفق' },
+      { id: 'c12_9', title: 'تست پرداخت ناموفق' },
+      { id: 'c12_10', title: 'تست پرداخت تکراری' },
+      { id: 'c12_11', title: 'تست بازیابی خرید' },
+      { id: 'c12_12', title: 'تست لغو و تمدید اشتراک' },
+      { id: 'c12_13', title: 'تست بازپرداخت وجه' },
+      { id: 'c12_14', title: 'تست فعال‌سازی امکانات خریداری‌شده' },
+      { id: 'c12_15', title: 'تست هماهنگی سایت و اپلیکیشن' },
+      { id: 'c12_16', title: 'تست امنیت' },
+      { id: 'c12_17', title: 'تست سرعت' },
+      { id: 'c12_18', title: 'تست بار همزمان کاربران' },
+      { id: 'c12_19', title: 'تست بازیابی نسخه پشتیبان' },
+      { id: 'c12_20', title: 'تست سازگاری با دستگاه‌های مختلف' },
+      { id: 'c12_21', title: 'رفع خطاهای شناسایی‌شده' },
+      { id: 'c12_22', title: 'دریافت تأیید نهایی پیش از انتشار' }
+    ]
+  },
+  {
+    id: 'deployment',
+    title: '۱۳. انتشار اپلیکیشن و وب‌سایت',
+    icon: 'fa-rocket',
+    color: 'from-orange-500 to-rose-600',
+    tasks: [
+      { id: 'c13_1', title: 'تهیه حساب توسعه‌دهنده فروشگاه اندروید' },
+      { id: 'c13_2', title: 'تهیه حساب توسعه‌دهنده اپل، در صورت نیاز' },
+      { id: 'c13_3', title: 'بررسی شرایط و هزینه‌های حساب‌های توسعه‌دهنده' },
+      { id: 'c13_4', title: 'آماده‌سازی آیکون و تصاویر معرفی اپلیکیشن' },
+      { id: 'c13_5', title: 'تهیه توضیحات اپلیکیشن برای فروشگاه' },
+      { id: 'c13_6', title: 'تکمیل اطلاعات حریم خصوصی' },
+      { id: 'c13_7', title: 'آماده‌سازی نسخه نهایی اندروید' },
+      { id: 'c13_8', title: 'آماده‌سازی نسخه نهایی iOS، در صورت نیاز' },
+      { id: 'c13_9', title: 'ارسال اپلیکیشن برای بررسی فروشگاه' },
+      { id: 'c13_10', title: 'رفع ایرادهای اعلام‌شده توسط فروشگاه' },
+      { id: 'c13_11', title: 'اتصال دامنه به سرور اصلی' },
+      { id: 'c13_12', title: 'راه‌اندازی نسخه اصلی وب‌سایت' },
+      { id: 'c13_13', title: 'بررسی عملکرد سایت پس از انتشار' },
+      { id: 'c13_14', title: 'بررسی عملکرد پرداخت واقعی' },
+      { id: 'c13_15', title: 'بررسی ثبت صحیح تراکنش‌ها' },
+      { id: 'c13_16', title: 'فعال‌سازی مانیتورینگ' },
+      { id: 'c13_17', title: 'تهیه نسخه پشتیبان پیش از انتشار' }
+    ]
+  },
+  {
+    id: 'analytics',
+    title: '۱۴. تحلیل داده‌ها و گزارش‌گیری',
+    icon: 'fa-chart-line',
+    color: 'from-blue-600 to-cyan-600',
+    tasks: [
+      { id: 'c14_1', title: 'راه‌اندازی ابزار تحلیل رفتار کاربران' },
+      { id: 'c14_2', title: 'ثبت تعداد نصب‌ها' },
+      { id: 'c14_3', title: 'ثبت تعداد کاربران ثبت‌نام‌شده' },
+      { id: 'c14_4', title: 'ثبت کاربران فعال' },
+      { id: 'c14_5', title: 'ثبت میزان استفاده از امکانات' },
+      { id: 'c14_6', title: 'ثبت تعداد خریدها' },
+      { id: 'c14_7', title: 'ثبت درآمد حاصل از خریدها' },
+      { id: 'c14_8', title: 'ثبت نرخ تبدیل کاربران به خریدار' },
+      { id: 'c14_9', title: 'ثبت نرخ لغو اشتراک' },
+      { id: 'c14_10', title: 'ثبت خطاهای اپلیکیشن' },
+      { id: 'c14_11', title: 'ثبت عملکرد و سرعت سایت' },
+      { id: 'c14_12', title: 'طراحی داشبورد مدیریتی' },
+      { id: 'c14_13', title: 'تهیه گزارش‌های دوره‌ای' },
+      { id: 'c14_14', title: 'رعایت حریم خصوصی در جمع‌آوری داده‌ها' }
+    ]
+  },
+  {
+    id: 'maintenance',
+    title: '۱۵. نگهداری و توسعه مستمر',
+    icon: 'fa-screwdriver-wrench',
+    color: 'from-slate-600 to-zinc-700',
+    tasks: [
+      { id: 'c15_1', title: 'پایش مداوم سرور' },
+      { id: 'c15_2', title: 'پایش عملکرد اپلیکیشن' },
+      { id: 'c15_3', title: 'بررسی خطاهای کاربران' },
+      { id: 'c15_4', title: 'به‌روزرسانی امنیتی' },
+      { id: 'c15_5', title: 'به‌روزرسانی کتابخانه‌ها و وابستگی‌ها' },
+      { id: 'c15_6', title: 'بررسی وضعیت پرداخت‌ها' },
+      { id: 'c15_7', title: 'بررسی تمدید اشتراک‌ها' },
+      { id: 'c15_8', title: 'بررسی گزارش‌های مالی' },
+      { id: 'c15_9', title: 'تهیه نسخه پشتیبان منظم' },
+      { id: 'c15_10', title: 'آزمایش دوره‌ای بازیابی اطلاعات' },
+      { id: 'c15_11', title: 'رفع مشکلات گزارش‌شده' },
+      { id: 'c15_12', title: 'انتشار نسخه‌های جدید' },
+      { id: 'c15_13', title: 'بررسی بازخورد کاربران' },
+      { id: 'c15_14', title: 'توسعه امکانات جدید' },
+      { id: 'c15_15', title: 'برنامه‌ریزی ظرفیت سرور بر اساس رشد کاربران' },
+      { id: 'c15_16', title: 'مستندسازی تغییرات' },
+      { id: 'c15_17', title: 'تهیه برنامه تداوم کسب‌وکار و بازیابی پس از بحران' }
+    ]
+  },
+  {
+    id: 'video_season_1',
+    title: 'تولید ویدیو: فصل اول',
+    icon: 'fa-video',
+    color: 'from-pink-500 to-rose-600',
+    tasks: [
+      { id: 'vs1_1', title: 'تکمیل سناریو و محتوای فصل اول' },
+      { id: 'vs1_2', title: 'تولید ویدیوهای فصل اول' },
+      { id: 'vs1_3', title: 'تدوین ویدیوها' },
+      { id: 'vs1_4', title: 'صداگذاری و موسیقی' },
+      { id: 'vs1_5', title: 'طراحی کاور فصل و قسمت‌ها' },
+      { id: 'vs1_6', title: 'کنترل کیفیت نهایی' },
+      { id: 'vs1_7', title: 'تأیید و آماده‌سازی برای انتشار' },
+      { id: 'vs1_8', title: 'بارگذاری ویدیوها در سایت و اپلیکیشن' }
+    ]
+  },
+  {
+    id: 'video_season_2',
+    title: 'تولید ویدیو: فصل دوم',
+    icon: 'fa-film',
+    color: 'from-fuchsia-500 to-pink-600',
+    tasks: [
+      { id: 'vs2_1', title: 'تکمیل سناریو و محتوای فصل دوم' },
+      { id: 'vs2_2', title: 'تولید ویدیوهای فصل دوم' },
+      { id: 'vs2_3', title: 'تدوین ویدیوها' },
+      { id: 'vs2_4', title: 'صداگذاری و موسیقی' },
+      { id: 'vs2_5', title: 'طراحی کاور فصل و قسمت‌ها' },
+      { id: 'vs2_6', title: 'کنترل کیفیت نهایی' },
+      { id: 'vs2_7', title: 'تأیید و آماده‌سازی برای انتشار' },
+      { id: 'vs2_8', title: 'بارگذاری ویدیوها در سایت و اپلیکیشن' }
+    ]
+  },
+  {
+    id: 'video_season_3',
+    title: 'تولید ویدیو: فصل سوم',
+    icon: 'fa-clapperboard',
+    color: 'from-violet-500 to-purple-600',
+    tasks: [
+      { id: 'vs3_1', title: 'تکمیل سناریو و محتوای فصل سوم' },
+      { id: 'vs3_2', title: 'تولید ویدیوهای فصل سوم' },
+      { id: 'vs3_3', title: 'تدوین ویدیوها' },
+      { id: 'vs3_4', title: 'صداگذاری و موسیقی' },
+      { id: 'vs3_5', title: 'طراحی کاور فصل و قسمت‌ها' },
+      { id: 'vs3_6', title: 'کنترل کیفیت نهایی' },
+      { id: 'vs3_7', title: 'تأیید و آماده‌سازی برای انتشار' },
+      { id: 'vs3_8', title: 'بارگذاری ویدیوها در سایت و اپلیکیشن' }
+    ]
+  },
+  {
+    id: 'video_management',
+    title: 'مدیریت محتوای ویدیویی',
+    icon: 'fa-photo-film',
+    color: 'from-indigo-600 to-fuchsia-700',
+    tasks: [
+      { id: 'vm_1', title: 'تعیین تعداد قسمت‌های هر فصل' },
+      { id: 'vm_2', title: 'شماره‌گذاری قسمت‌ها' },
+      { id: 'vm_3', title: 'نوشتن عنوان و توضیحات هر قسمت' },
+      { id: 'vm_4', title: 'تعیین مدت‌زمان هر ویدیو' },
+      { id: 'vm_5', title: 'دسته‌بندی ویدیوها بر اساس فصل و قسمت' },
+      { id: 'vm_6', title: 'تهیه زیرنویس، در صورت نیاز' },
+      { id: 'vm_7', title: 'تهیه نسخه‌های مختلف کیفیت ویدیو' },
+      { id: 'vm_8', title: 'فشرده‌سازی و بهینه‌سازی فایل‌ها' },
+      { id: 'vm_9', title: 'بارگذاری ویدیوها روی فضای ذخیره‌سازی' },
+      { id: 'vm_10', title: 'راه‌اندازی سیستم پخش آنلاین ویدیو' },
+      { id: 'vm_11', title: 'تعیین ترتیب نمایش فصل‌ها و قسمت‌ها' },
+      { id: 'vm_12', title: 'تعیین تاریخ انتشار هر قسمت' },
+      { id: 'vm_13', title: 'تعیین دسترسی رایگان یا پولی برای هر فصل و قسمت' },
+      { id: 'vm_14', title: 'بررسی عملکرد پخش ویدیو در سایت و اپلیکیشن' },
+      { id: 'vm_15', title: 'بررسی کیفیت صدا و تصویر پس از بارگذاری' },
+      { id: 'vm_16', title: 'تهیه نسخه پشتیبان از فایل‌های اصلی ویدیو' },
+      { id: 'vm_17', title: 'ثبت وضعیت تولید هر قسمت (در حال تولید، آماده بررسی، تأییدشده، منتشرشده)' }
+    ]
+  }
+];
+
+</script>
+  <script>
+/**
+ * منطق ساده، تمیز و قدرتمند داشبورد کنترل پروژه اپلیکیشن و وب‌سایت
+ * بدون نام اشخاص، بدون پیچیدگی و با ذخیره و اشتراک از طریق یک لینک واحد
+ */
+
+const STORAGE_KEY = 'PROJECT_TRACKER_SIMPLE_STATE_V1';
+
+// ساختار وضعیت پروژه
+let state = {
+  categories: JSON.parse(JSON.stringify(INITIAL_CATEGORIES)),
+  filters: {
+    search: '',
+    status: 'all', // 'all', 'completed', 'pending'
+    category: 'all' // 'all' or categoryId
+  },
+  collapsedCategories: {},
+  soundEnabled: true
+};
+
+// نمونه‌های نمودار Chart.js
+let chartOverall = null;
+let chartPhases = null;
+let serverSaveTimeout = null;
+
+// سیستم پخش صدای تیک با Web Audio API
+function playCheckSound() {
+  if (!state.soundEnabled) return;
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12);
+
+    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.22);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.22);
+  } catch (e) {
+    // صدا مسدود یا پشتیبانی نشده است
+  }
+}
+
+// دریافت لیست مرتب تمام شناسه تسک‌ها (جهت کدگذاری در هش URL)
+function getAllTaskIds() {
+  const ids = [];
+  for (const cat of INITIAL_CATEGORIES) {
+    for (const task of cat.tasks) {
+      ids.push(task.id);
+    }
+  }
+  return ids;
+}
+
+// تبدیل ۳۱۸ وضعیت به رشته فشرده Base64URL در هش آدرس اینترنتی (حدود ۵۰ کاراکتر)
+function encodeStateToBitset() {
+  const allIds = getAllTaskIds();
+  const byteCount = Math.ceil(allIds.length / 8);
+  const bytes = new Uint8Array(byteCount);
+
+  const taskMap = {};
+  for (const cat of state.categories) {
+    for (const t of cat.tasks) {
+      taskMap[t.id] = !!t.completed;
+    }
+  }
+
+  for (let i = 0; i < allIds.length; i++) {
+    if (taskMap[allIds[i]]) {
+      const byteIndex = Math.floor(i / 8);
+      const bitOffset = i % 8;
+      bytes[byteIndex] |= (1 << bitOffset);
+    }
+  }
+
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+// رمزگشایی رشته فشرده هش و بازیابی وضعیت ۳۱۸ تسک
+function decodeBitsetToState(hashString) {
+  try {
+    let clean = hashString;
+    if (clean.startsWith('#')) clean = clean.substring(1);
+    if (clean.startsWith('p=')) clean = clean.substring(2);
+
+    let base64 = clean.replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4) {
+      base64 += '=';
+    }
+
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+
+    const allIds = getAllTaskIds();
+    const idMap = {};
+    for (let i = 0; i < allIds.length; i++) {
+      const byteIndex = Math.floor(i / 8);
+      const bitOffset = i % 8;
+      if (byteIndex < bytes.length) {
+        idMap[allIds[i]] = !!(bytes[byteIndex] & (1 << bitOffset));
+      } else {
+        idMap[allIds[i]] = false;
+      }
+    }
+
+    for (const cat of state.categories) {
+      for (const t of cat.tasks) {
+        if (typeof idMap[t.id] === 'boolean') {
+          t.completed = idMap[t.id];
+        }
+      }
+    }
+    return true;
+  } catch (err) {
+    console.error('خطا در خواندن هش آدرس:', err);
+    return false;
+  }
+}
+
+// به‌روزرسانی هش آدرس در مرورگر بدون ریفرش صفحه
+function updateUrlHash() {
+  const hash = encodeStateToBitset();
+  const newUrl = window.location.pathname + window.location.search + '#p=' + hash;
+  window.history.replaceState(null, '', newUrl);
+}
+
+// ذخیره‌سازی داده‌ها: هم در LocalStorage، هم در URL هش، هم در سرور محلی (در صورت وجود)
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.error('LocalStorage write failed', e);
+  }
+
+  updateUrlHash();
+
+  // در صورت اجرای سرور Node.js محلی روی پورت ۳۰۰۰
+  if (window.location.protocol.startsWith('http') && window.location.port === '3000') {
+    clearTimeout(serverSaveTimeout);
+    serverSaveTimeout = setTimeout(() => {
+      fetch('/api/state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state)
+      }).catch(() => {});
+    }, 400);
+  }
+}
+
+// بارگذاری اولیه وضعیت
+function loadState() {
+  let loadedFromHash = false;
+
+  // ۱. اگر لینک حاوی هش وضعیت باشد (همکار لینک را باز کرده باشد)
+  if (window.location.hash && window.location.hash.includes('p=')) {
+    loadedFromHash = decodeBitsetToState(window.location.hash);
+  }
+
+  // ۲. اگر از هش خوانده نشد، از حافظه محلی مرورگر خوانده شود
+  if (!loadedFromHash) {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.categories && Array.isArray(parsed.categories) && parsed.categories.length > 0) {
+          state.categories = parsed.categories;
+          if (parsed.collapsedCategories) state.collapsedCategories = parsed.collapsedCategories;
+        } else {
+          state.categories = JSON.parse(JSON.stringify(INITIAL_CATEGORIES));
+        }
+      }
+    } catch (e) {
+      console.error('LocalStorage read error', e);
+      state.categories = JSON.parse(JSON.stringify(INITIAL_CATEGORIES));
+    }
+  }
+
+  if (!state.categories || !Array.isArray(state.categories) || state.categories.length === 0) {
+    state.categories = JSON.parse(JSON.stringify(INITIAL_CATEGORIES));
+  }
+
+  // به‌روزرسانی هش URL تا همیشه آماده کپی و اشتراک باشد
+  updateUrlHash();
+}
+
+// کپی کردن لینک پیشرفت جهت اشتراک با همکاران
+function copyProjectShareLink() {
+  updateUrlHash();
+  const url = window.location.href;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('📋 لینک کپی شد! می‌توانید این لینک را برای همکارانتان بفرستید.');
+    }).catch(() => {
+      fallbackCopy(url);
+    });
+  } else {
+    fallbackCopy(url);
+  }
+}
+
+function fallbackCopy(text) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-9999px';
+  document.body.appendChild(textArea);
+  textArea.select();
+  try {
+    document.execCommand('copy');
+    showToast('📋 لینک کپی شد! می‌توانید این لینک را برای همکارانتان بفرستید.');
+  } catch (err) {
+    prompt('لینک زیر را کپی کرده و برای همکارانتان بفرستید:', text);
+  }
+  document.body.removeChild(textArea);
+}
+
+// تاگل کردن یک تسک (تیک زدن یا برداشتن تیک)
+function toggleTask(taskId) {
+  let foundTask = null;
+  for (const cat of state.categories) {
+    for (const t of cat.tasks) {
+      if (t.id === taskId) {
+        t.completed = !t.completed;
+        foundTask = t;
+        break;
+      }
+    }
+    if (foundTask) break;
+  }
+
+  if (foundTask) {
+    if (foundTask.completed) {
+      playCheckSound();
+    }
+    saveState();
+    updateUI();
+  }
+}
+
+// تیک زدن یا پاک کردن همه تسک‌های یک سرفصل
+function toggleCategoryAll(catId, targetStatus) {
+  const cat = state.categories.find(c => c.id === catId);
+  if (!cat) return;
+
+  for (const task of cat.tasks) {
+    task.completed = targetStatus;
+  }
+
+  if (targetStatus) playCheckSound();
+  saveState();
+  updateUI();
+  showToast(targetStatus ? `تمام تسک‌های «${cat.title}» انجام شد.` : `تیک‌های «${cat.title}» برداشته شد.`);
+}
+
+// محاسبه آمار و ارقام پروژه
+function calculateStats() {
+  let totalTasks = 0;
+  let completedTasks = 0;
+  let completedPhases = 0;
+
+  const categoryStats = state.categories.map(cat => {
+    const total = cat.tasks.length;
+    const completed = cat.tasks.filter(t => t.completed).length;
+    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    if (percent === 100 && total > 0) completedPhases++;
+    totalTasks += total;
+    completedTasks += completed;
+    return {
+      id: cat.id,
+      title: cat.title,
+      total,
+      completed,
+      pending: total - completed,
+      percent
+    };
+  });
+
+  const overallPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+  return {
+    totalTasks,
+    completedTasks,
+    pendingTasks: totalTasks - completedTasks,
+    completedPhases,
+    totalPhases: state.categories.length,
+    overallPercent,
+    categoryStats
+  };
+}
+
+// به‌روزرسانی کامل رابط کاربری
+function updateUI() {
+  const stats = calculateStats();
+
+  // کارت‌های بالا
+  const statOverallPercent = document.getElementById('statOverallPercent');
+  const statProgressBar = document.getElementById('statProgressBar');
+  const statTotalTasks = document.getElementById('statTotalTasks');
+  const statCompletedTasks = document.getElementById('statCompletedTasks');
+  const statPendingTasks = document.getElementById('statPendingTasks');
+  const statCompletedPhases = document.getElementById('statCompletedPhases');
+  const chartOverallCenterText = document.getElementById('chartOverallCenterText');
+
+  if (statOverallPercent) statOverallPercent.innerText = toPersianDigits(stats.overallPercent) + '٪';
+  if (statProgressBar) statProgressBar.style.width = stats.overallPercent + '%';
+  if (statTotalTasks) statTotalTasks.innerText = toPersianDigits(stats.totalTasks);
+  if (statCompletedTasks) statCompletedTasks.innerText = toPersianDigits(stats.completedTasks);
+  if (statPendingTasks) statPendingTasks.innerText = toPersianDigits(stats.pendingTasks);
+  if (statCompletedPhases) statCompletedPhases.innerText = `${toPersianDigits(stats.completedPhases)} از ${toPersianDigits(stats.totalPhases)}`;
+  if (chartOverallCenterText) chartOverallCenterText.innerText = toPersianDigits(stats.overallPercent) + '٪';
+
+  // به‌روزرسانی نمودارها
+  updateCharts(stats);
+
+  // رندر چک‌لیست‌ها
+  renderChecklists();
+}
+
+// رسم و به‌روزرسانی نمودارهای Chart.js
+function updateCharts(stats) {
+  // نمودار ۱: دونات وضعیت کل
+  const overallCtx = document.getElementById('chartOverallCanvas');
+  if (overallCtx) {
+    const data = [stats.completedTasks, stats.pendingTasks];
+    if (!chartOverall) {
+      chartOverall = new Chart(overallCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['انجام‌شده', 'باقی‌مانده'],
+          datasets: [{
+            data: data,
+            backgroundColor: ['#10b981', '#334155'],
+            borderWidth: 0,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: '#cbd5e1',
+                font: { family: 'Vazirmatn', size: 12 },
+                padding: 14
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: ctx => ` ${ctx.label}: ${toPersianDigits(ctx.raw)} تسک (${toPersianDigits(Math.round((ctx.raw / stats.totalTasks) * 100)) || '۰'}٪)`
+              }
+            }
+          }
+        }
+      });
+    } else {
+      chartOverall.data.datasets[0].data = data;
+      chartOverall.update();
+    }
+  }
+
+  // نمودار ۲: میله‌ای پیشرفت ۲۰ فاز
+  const phasesCtx = document.getElementById('chartPhasesCanvas');
+  if (phasesCtx) {
+    const labels = stats.categoryStats.map(c => {
+      // کوتاه کردن عنوان برای زیبایی در نمودار
+      return c.title.replace(/^[۰-۹0-9IVXLCDM]+\.\s*/, '');
+    });
+    const values = stats.categoryStats.map(c => c.percent);
+
+    if (!chartPhases) {
+      chartPhases = new Chart(phasesCtx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'درصد پیشرفت فاز',
+            data: values,
+            backgroundColor: values.map(v => v === 100 ? '#10b981' : v > 0 ? '#3b82f6' : '#475569'),
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          scales: {
+            x: {
+              min: 0,
+              max: 100,
+              ticks: {
+                color: '#94a3b8',
+                font: { family: 'Vazirmatn', size: 10 },
+                callback: v => toPersianDigits(v) + '٪'
+              },
+              grid: { color: 'rgba(255, 255, 255, 0.05)' }
+            },
+            y: {
+              ticks: {
+                color: '#cbd5e1',
+                font: { family: 'Vazirmatn', size: 11 },
+                autoSkip: false
+              },
+              grid: { display: false }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => ` پیشرفت: ${toPersianDigits(ctx.raw)}٪`
+              }
+            }
+          }
+        }
+      });
+    } else {
+      chartPhases.data.labels = labels;
+      chartPhases.data.datasets[0].data = values;
+      chartPhases.data.datasets[0].backgroundColor = values.map(v => v === 100 ? '#10b981' : v > 0 ? '#3b82f6' : '#475569');
+      chartPhases.update();
+    }
+  }
+}
+
+// رندر چک‌لیست‌های ۲۰ گانه
+function renderChecklists() {
+  const container = document.getElementById('checklistContainer');
+  if (!container) return;
+
+  const searchQuery = (state.filters.search || '').trim().toLowerCase();
+  const statusFilter = state.filters.status || 'all';
+  const categoryFilter = state.filters.category || 'all';
+
+  let html = '';
+
+  for (const cat of state.categories) {
+    if (categoryFilter !== 'all' && cat.id !== categoryFilter) {
+      continue;
+    }
+
+    // فیلتر کردن تسک‌های داخل این سرفصل
+    const filteredTasks = cat.tasks.filter(task => {
+      if (searchQuery && !task.title.toLowerCase().includes(searchQuery)) {
+        return false;
+      }
+      if (statusFilter === 'completed' && !task.completed) {
+        return false;
+      }
+      if (statusFilter === 'pending' && task.completed) {
+        return false;
+      }
+      return true;
+    });
+
+    // اگر جستجو یا فیلتر فعاله و هیچ تسکی مچ نشد، سرفصل مخفی شود
+    if (filteredTasks.length === 0 && (searchQuery || statusFilter !== 'all')) {
+      continue;
+    }
+
+    const totalInCat = cat.tasks.length;
+    const completedInCat = cat.tasks.filter(t => t.completed).length;
+    const catPercent = totalInCat > 0 ? Math.round((completedInCat / totalInCat) * 100) : 0;
+    const isCollapsed = !!state.collapsedCategories[cat.id];
+
+    html += `
+      <div class="glass-panel rounded-2xl border ${catPercent === 100 ? 'border-emerald-500/40 bg-emerald-950/10' : 'border-slate-800'} shadow-lg overflow-hidden transition-all duration-300">
+        
+        <!-- سربرگ سرفصل -->
+        <div class="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 cursor-pointer select-none border-b border-slate-800/80" onclick="toggleCollapseCategory('${cat.id}')">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr ${cat.color || 'from-blue-600 to-indigo-600'} flex items-center justify-center text-white shadow-md text-base">
+              <i class="fa-solid ${cat.icon || 'fa-folder-open'}"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+                ${cat.title}
+                ${catPercent === 100 ? '<span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40"><i class="fa-solid fa-check"></i> تکمیل شد</span>' : ''}
+              </h3>
+              <div class="text-xs text-slate-400 mt-1 flex items-center gap-3">
+                <span>${toPersianDigits(completedInCat)} از ${toPersianDigits(totalInCat)} تسک انجام شده</span>
+                <span class="font-bold ${catPercent === 100 ? 'text-emerald-400' : 'text-blue-400'}">${toPersianDigits(catPercent)}٪</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+            <!-- دکمه تیک زدن همه -->
+            <button onclick="toggleCategoryAll('${cat.id}', true)" class="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 transition" title="انجام همه تسک‌های این بخش">
+              تیک همه
+            </button>
+            <button onclick="toggleCategoryAll('${cat.id}', false)" class="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 transition" title="حذف تیک‌های این بخش">
+              پاک کردن
+            </button>
+            <!-- آیکون آکاردئون -->
+            <div class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center text-xs">
+              <i class="fa-solid ${isCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'} transition-transform"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- نوار پیشرفت باریک سرفصل -->
+        <div class="w-full bg-slate-800/80 h-1.5 overflow-hidden">
+          <div class="bg-gradient-to-r from-blue-500 to-emerald-400 h-full transition-all duration-300" style="width: ${catPercent}%;"></div>
+        </div>
+
+        <!-- محتوای تسک‌ها -->
+        <div class="${isCollapsed ? 'hidden' : 'p-3 sm:p-5 space-y-2 bg-slate-950/40'}">
+          ${filteredTasks.length === 0 ? `
+            <div class="text-center py-6 text-xs text-slate-500">
+              هیچ تسکی با این مشخصات یافت نشد.
+            </div>
+          ` : filteredTasks.map(task => `
+            <div class="flex items-center gap-3 p-2.5 sm:p-3 rounded-xl transition ${task.completed ? 'bg-slate-900/30 opacity-75' : 'hover:bg-slate-900/60'} border border-slate-800/40">
+              <input 
+                type="checkbox" 
+                id="task_${task.id}"
+                class="task-checkbox" 
+                ${task.completed ? 'checked' : ''}
+                onchange="toggleTask('${task.id}')"
+              >
+              <label for="task_${task.id}" class="flex-1 cursor-pointer select-none">
+                <span class="text-xs sm:text-sm font-medium transition ${task.completed ? 'line-through text-slate-500' : 'text-slate-200'}">
+                  ${task.title}
+                </span>
+              </label>
+            </div>
+          `).join('')}
+        </div>
+
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+// باز یا بسته کردن یک سرفصل
+function toggleCollapseCategory(catId) {
+  state.collapsedCategories[catId] = !state.collapsedCategories[catId];
+  saveState();
+  renderChecklists();
+}
+
+function expandAllCategories() {
+  state.collapsedCategories = {};
+  saveState();
+  renderChecklists();
+}
+
+function collapseAllCategories() {
+  for (const cat of state.categories) {
+    state.collapsedCategories[cat.id] = true;
+  }
+  saveState();
+  renderChecklists();
+}
+
+function resetFilters() {
+  state.filters.search = '';
+  state.filters.status = 'all';
+  state.filters.category = 'all';
+
+  const sInput = document.getElementById('searchInput');
+  const fStatus = document.getElementById('filterStatus');
+  const fCategory = document.getElementById('filterCategory');
+
+  if (sInput) sInput.value = '';
+  if (fStatus) fStatus.value = 'all';
+  if (fCategory) fCategory.value = 'all';
+
+  renderChecklists();
+}
+
+// پر کردن منوی سرفصل‌ها در فیلتر
+function populateCategoryFilter() {
+  const select = document.getElementById('filterCategory');
+  if (!select) return;
+
+  select.innerHTML = '<option value="all">تمام سرفصل‌ها (۲۰ فاز)</option>' +
+    state.categories.map(cat => `<option value="${cat.id}">${cat.title}</option>`).join('');
+}
+
+// نمایش پیام Toast
+let toastTimeout = null;
+function showToast(message) {
+  const toast = document.getElementById('toastNotification');
+  if (!toast) return;
+
+  toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i> <span>${message}</span>`;
+  toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+  toast.classList.add('opacity-100', 'translate-y-0');
+
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+    toast.classList.remove('opacity-100', 'translate-y-0');
+  }, 3500);
+}
+
+// خروجی اکسل CSV کاملاً استاندارد و بدون نام شخص
+function exportToCsv() {
+  let csv = '\uFEFF'; // BOM برای نمایش صحیح حروف فارسی در اکسل
+  csv += 'ردیف,سرفصل,عنوان تسک,وضعیت\n';
+
+  let row = 1;
+  for (const cat of state.categories) {
+    for (const t of cat.tasks) {
+      const statusText = t.completed ? 'انجام شده' : 'در انتظار اقدام';
+      const cleanTitle = `"${(t.title || '').replace(/"/g, '""')}"`;
+      const cleanCat = `"${(cat.title || '').replace(/"/g, '""')}"`;
+      csv += `${row},${cleanCat},${cleanTitle},${statusText}\n`;
+      row++;
+    }
+  }
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `project-progress-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+  showToast('فایل اکسل (CSV) با موفقیت دانلود شد.');
+}
+
+// ذخیره فایل پشتیبان JSON
+function exportProjectData() {
+  const jsonStr = JSON.stringify(state, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `project-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  link.click();
+  showToast('فایل ذخیره پروژه دانلود شد.');
+}
+
+// بارگذاری فایل پشتیبان JSON
+function importProjectData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (imported.categories && Array.isArray(imported.categories)) {
+        state.categories = imported.categories;
+        saveState();
+        updateUI();
+        showToast('اطلاعات فایل با موفقیت بارگذاری شد.');
+      } else {
+        alert('ساختار فایل انتخاب شده معتبر نیست.');
+      }
+    } catch (err) {
+      alert('خطا در خواندن فایل JSON');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// بازنشانی تمام داده‌ها با تأیید
+function confirmResetAll() {
+  if (confirm('آیا مطمئن هستید؟ تمام تیک‌های تسک‌ها برداشته خواهند شد.')) {
+    for (const cat of state.categories) {
+      for (const t of cat.tasks) {
+        t.completed = false;
+      }
+    }
+    saveState();
+    updateUI();
+    showToast('تمام تیک‌ها بازنشانی شدند.');
+  }
+}
+
+// تبدیل اعداد انگلیسی به فارسی برای زیبایی فونت
+function toPersianDigits(num) {
+  if (num === null || num === undefined) return '';
+  const id = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return num.toString().replace(/[0-9]/g, function(w) {
+    return id[+w];
+  });
+}
+
+// راه‌اندازی اولیه رویدادها
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  populateCategoryFilter();
+  updateUI();
+
+  // فیلتر جستجو
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', e => {
+      state.filters.search = e.target.value;
+      renderChecklists();
+    });
+  }
+
+  // فیلتر وضعیت
+  const filterStatus = document.getElementById('filterStatus');
+  if (filterStatus) {
+    filterStatus.addEventListener('change', e => {
+      state.filters.status = e.target.value;
+      renderChecklists();
+    });
+  }
+
+  // فیلتر سرفصل
+  const filterCategory = document.getElementById('filterCategory');
+  if (filterCategory) {
+    filterCategory.addEventListener('change', e => {
+      state.filters.category = e.target.value;
+      renderChecklists();
+    });
+  }
+
+  // میانبرهای صفحه کلید (کلید / یا Ctrl+K برای جستجو)
+  document.addEventListener('keydown', e => {
+    if ((e.key === '/' || (e.ctrlKey && e.key === 'k')) && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput?.focus();
+    }
+  });
+
+  // اگر کاربر روی دکمه Back/Forward مرورگر کلیک کند، هش جدید خوانده شود
+  window.addEventListener('hashchange', () => {
+    if (window.location.hash && window.location.hash.includes('p=')) {
+      decodeBitsetToState(window.location.hash);
+      updateUI();
+    }
+  });
+});
+
+</script>
+
+</body>
+</html>
