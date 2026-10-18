@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>داشبورد کنترل پروژه اپلیکیشن و وب‌سایت</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Custom Styles & Vazirmatn Font -->
+  <link rel="stylesheet" href="style.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Vazirmatn', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- هدر اصلی داشبورد -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-30 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- لوگو و عنوان -->
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 text-xl font-bold">
+          <i class="fa-solid fa-bars-progress"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-lg sm:text-xl text-white tracking-tight flex items-center flex-wrap gap-2">
+            داشبورد کنترل پروژه اپلیکیشن و وب‌سایت
+            <span id="saveStatusBadge" class="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 font-medium">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> ذخیره خودکار فعال
+            </span>
+          </h1>
+          <p class="text-xs text-slate-400 mt-0.5">پیگیری گام‌به‌گام و ثبت پیشرفت ۳۱۸ تسک در ۲۰ سرفصل پروژه</p>
+        </div>
+      </div>
+
+      <!-- دکمه‌های عملیاتی هدر -->
+      <div class="flex items-center flex-wrap gap-2">
+        <!-- دکمه اصلی: کپی لینک برای همکاران -->
+        <button onclick="copyProjectShareLink()" class="px-4 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white transition flex items-center gap-2 shadow-lg shadow-blue-600/30 border border-blue-400/40" title="کپی لینک پیشرفت پروژه برای اشتراک با همکاران">
+          <i class="fa-solid fa-link text-blue-200"></i>
+          <span>📋 کپی لینک پیشرفت</span>
+        </button>
+
+        <!-- خروجی اکسل -->
+        <button onclick="exportToCsv()" class="px-3 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="خروجی کامل اکسل CSV">
+          <i class="fa-solid fa-file-excel text-emerald-400"></i>
+          <span class="hidden sm:inline">خروجی اکسل</span>
+        </button>
+
+        <!-- خروجی پشتیبان JSON -->
+        <button onclick="exportProjectData()" class="px-3 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="دانلود فایل پشتیبان">
+          <i class="fa-solid fa-download text-slate-400"></i>
+          <span class="hidden md:inline">ذخیره فایل</span>
+        </button>
+
+        <!-- بارگذاری پشتیبان JSON -->
+        <label class="px-3 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-sm" title="بارگذاری فایل پشتیبان قبلی">
+          <i class="fa-solid fa-upload text-slate-400"></i>
+          <span class="hidden md:inline">بارگذاری فایل</span>
+          <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importProjectData(event)">
+        </label>
+
+        <!-- چاپ / خروجی PDF -->
+        <button onclick="window.print()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 flex items-center justify-center transition" title="چاپ یا ذخیره PDF">
+          <i class="fa-solid fa-print"></i>
+        </button>
+
+        <!-- ریست تمام تیک‌ها -->
+        <button onclick="confirmResetAll()" class="w-8 h-8 rounded-xl bg-rose-950/40 hover:bg-rose-900/50 text-rose-400 border border-rose-800/40 flex items-center justify-center transition" title="بازنشانی تمام تیک‌ها">
+          <i class="fa-solid fa-arrow-rotate-left"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- کارت‌های آمار کلیدی پروژه (KPIs) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      
+      <!-- درصد کل پیشرفت -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-blue-500/30 bg-gradient-to-br from-blue-950/40 to-slate-900 relative overflow-hidden shadow-lg">
+        <div class="flex items-center justify-between text-xs text-blue-300 font-semibold mb-2">
+          <span>درصد پیشرفت کل</span>
+          <i class="fa-solid fa-chart-pie text-blue-400"></i>
+        </div>
+        <div class="text-3xl font-extrabold text-white mb-2" id="statOverallPercent">۰٪</div>
+        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+          <div id="statProgressBar" class="bg-gradient-to-r from-blue-500 to-emerald-400 h-full transition-all duration-500" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- کل تسک‌ها -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800 shadow-lg">
+        <div class="flex items-center justify-between text-xs text-slate-400 font-medium mb-1">
+          <span>کل تسک‌های پروژه</span>
+          <i class="fa-solid fa-list-check text-slate-500"></i>
+        </div>
+        <div class="text-2xl font-bold text-slate-100" id="statTotalTasks">۳۱۸</div>
+        <div class="text-[11px] text-slate-400 mt-2">در ۲۰ سرفصل تخصصی</div>
+      </div>
+
+      <!-- تسک‌های انجام‌شده -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-emerald-500/20 bg-emerald-950/10 shadow-lg">
+        <div class="flex items-center justify-between text-xs text-emerald-400 font-medium mb-1">
+          <span>انجام‌شده</span>
+          <i class="fa-solid fa-check-circle text-emerald-400"></i>
+        </div>
+        <div class="text-2xl font-bold text-emerald-400" id="statCompletedTasks">۰</div>
+        <div class="text-[11px] text-emerald-500/80 mt-2">مراحل تکمیل‌شده</div>
+      </div>
+
+      <!-- تسک‌های باقی‌مانده -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-amber-500/20 bg-amber-950/10 shadow-lg">
+        <div class="flex items-center justify-between text-xs text-amber-400 font-medium mb-1">
+          <span>باقی‌مانده</span>
+          <i class="fa-solid fa-clock text-amber-400"></i>
+        </div>
+        <div class="text-2xl font-bold text-amber-400" id="statPendingTasks">۳۱۸</div>
+        <div class="text-[11px] text-amber-500/80 mt-2">در انتظار انجام</div>
+      </div>
+
+      <!-- فازهای تکمیل‌شده -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-purple-500/20 bg-purple-950/10 shadow-lg">
+        <div class="flex items-center justify-between text-xs text-purple-300 font-medium mb-1">
+          <span>سرفصل‌های ۱۰۰٪ شده</span>
+          <i class="fa-solid fa-circle-check text-purple-400"></i>
+        </div>
+        <div class="text-2xl font-bold text-purple-300" id="statCompletedPhases">۰ از ۲۰</div>
+        <div class="text-[11px] text-purple-400/80 mt-2">فازهای کامل‌شده</div>
+      </div>
+
+    </div>
+
+    <!-- بخش نمودارهای پیشرفت -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 no-print">
+      
+      <!-- نمودار ۱: دونات وضعیت اتمام پروژه -->
+      <div class="lg:col-span-4 glass-panel rounded-2xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-gauge-high text-emerald-400"></i>
+            نسبت کل تسک‌ها
+          </h3>
+          <span class="text-xs text-slate-400">انجام‌شده / باقی‌مانده</span>
+        </div>
+        <div class="relative h-64 flex items-center justify-center">
+          <canvas id="chartOverallCanvas"></canvas>
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <div id="chartOverallCenterText" class="text-3xl font-extrabold text-white">۰٪</div>
+            <div class="text-[11px] text-slate-400 font-medium">پیشرفت کل</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- نمودار ۲: درصد پیشرفت تک‌تک فازهای پروژه -->
+      <div class="lg:col-span-8 glass-panel rounded-2xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-chart-column text-blue-400"></i>
+            درصد پیشرفت ۲۰ سرفصل پروژه
+          </h3>
+          <span class="text-xs text-slate-400">از ۰ تا ۱۰۰ درصد</span>
+        </div>
+        <div class="h-64 relative">
+          <canvas id="chartPhasesCanvas"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- نوار جستجو، فیلترها و عملیات سریع -->
+    <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800 shadow-xl no-print space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        
+        <!-- جستجو در متن تسک‌ها -->
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3 text-slate-400 text-xs"></i>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="جستجو در تسک‌ها... (کلید / یا Ctrl+K)"
+            class="w-full pr-9 pl-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+          >
+        </div>
+
+        <!-- فیلتر وضعیت -->
+        <div>
+          <select 
+            id="filterStatus"
+            class="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-700 text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer"
+          >
+            <option value="all">تمام وضعیت‌ها (همه تسک‌ها)</option>
+            <option value="pending">فقط باقی‌مانده‌ها (تیک نخورده)</option>
+            <option value="completed">فقط تکمیل‌شده‌ها (تیک خورده)</option>
+          </select>
+        </div>
+
+        <!-- فیلتر فازها -->
+        <div>
+          <select 
+            id="filterCategory"
+            class="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-700 text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer"
+          >
+            <!-- پر می‌شود توسط JS -->
+          </select>
+        </div>
+
+      </div>
+
+      <!-- دکمه‌های کنترل باز/بسته کردن همه فازها -->
+      <div class="flex items-center justify-between border-t border-slate-800 pt-3 flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <button onclick="expandAllCategories()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-angles-down text-[10px]"></i>
+            <span>باز کردن تمام فازها</span>
+          </button>
+          <button onclick="collapseAllCategories()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-angles-up text-[10px]"></i>
+            <span>بستن تمام فازها</span>
+          </button>
+          <button onclick="resetFilters()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/60 text-slate-400 hover:text-white transition flex items-center gap-1.5">
+            <i class="fa-solid fa-filter-circle-xmark text-[10px]"></i>
+            <span>پاک کردن فیلترها</span>
+          </button>
+        </div>
+
+        <div class="text-xs text-slate-400 flex items-center gap-2">
+          <i class="fa-solid fa-circle-info text-blue-400"></i>
+          <span>برای ثبت پیشرفت، روی چک‌باکس هر تسک کلیک کنید. تغییرات بلافاصله ذخیره می‌شوند.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- محفظه اصلی چک‌لیست‌های ۲۰ گانه -->
+    <div id="checklistContainer" class="space-y-4">
+      <!-- پر می‌شود توسط JavaScript -->
+    </div>
+
+  </main>
+
+  <!-- پیام اعلان فلوتینگ (Toast) -->
+  <div id="toastNotification" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-slate-900/95 border border-blue-500/50 text-white text-xs font-medium shadow-2xl backdrop-blur transition-all duration-300 opacity-0 translate-y-4 pointer-events-none flex items-center gap-2">
+    اعلان سیستم
+  </div>
+
+  <!-- اسکریپت‌های پروژه -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
